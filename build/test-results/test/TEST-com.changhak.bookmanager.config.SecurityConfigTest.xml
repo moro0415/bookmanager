@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.changhak.bookmanager.config.SecurityConfigTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-07-06T15:15:38.932Z" hostname="DESKTOP-COURF6F" time="0.203">
+  <properties/>
+  <testcase name="password()" classname="com.changhak.bookmanager.config.SecurityConfigTest" time="0.203"/>
+  <system-out><![CDATA[encoded = $2a$10$KFDGfOgdT4fktfm3DTgr9OU.LqCLuCAb8XLoegaCnmEsgSRBhX1y6
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

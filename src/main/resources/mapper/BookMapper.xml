@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.changhak.bookmanager.repository.BookRepository">
+
+    <insert id="save"
+            parameterType="com.changhak.bookmanager.domain.Book"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO book (title, author, publisher, isbn, stock, image_filename, thumbnail_filename)
+        VALUES (#{title}, #{author}, #{publisher}, #{isbn}, #{stock}, #{imageFilename}, #{thumbnailFilename})
+    </insert>
+
+    <select id="findAll" resultType="com.changhak.bookmanager.domain.Book">
+        SELECT id, title, author, publisher, isbn, stock, deleted,
+        image_filename AS imageFilename,
+        thumbnail_filename AS thumbnailFilename
+        FROM book
+        WHERE deleted = false
+        ORDER BY id DESC
+    </select>
+
+    <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Book">
+        SELECT id, title, author, publisher, isbn, stock, deleted,
+        image_filename AS imageFilename,
+        thumbnail_filename AS thumbnailFilename
+        FROM book
+        WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="com.changhak.bookmanager.domain.Book">
+        UPDATE book
+        SET title = #{title},
+        author = #{author},
+        publisher = #{publisher},
+        isbn = #{isbn},
+        stock = #{stock},
+        image_filename = #{imageFilename},
+        thumbnail_filename = #{thumbnailFilename}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        UPDATE book SET deleted = true WHERE id = #{id}
+    </delete>
+
+    <select id="search" parameterType="com.changhak.bookmanager.dto.SearchCondition"
+            resultType="com.changhak.bookmanager.domain.Book">
+        SELECT id, title, author, publisher, isbn, stock, deleted,
+        image_filename AS imageFilename,
+        thumbnail_filename AS thumbnailFilename
+        FROM book
+        <where>
+            deleted = false
+            <if test="keyword != null and keyword != ''">
+                AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR author LIKE CONCAT('%', #{keyword}, '%')
+                OR publisher LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" parameterType="com.changhak.bookmanager.dto.SearchCondition" resultType="int">
+        SELECT COUNT(*)
+        FROM book
+        <where>
+            deleted = false
+            <if test="keyword != null and keyword != ''">
+                AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR author LIKE CONCAT('%', #{keyword}, '%')
+                OR publisher LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <update id="updateStock">
+        UPDATE book
+        SET stock = #{stock}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+

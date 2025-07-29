@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.changhak.bookmanager.repository.MemberRepository">
+
+    <insert id="save"
+            parameterType="com.changhak.bookmanager.domain.Member"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO member (name, email, phone, address, created_date)
+        VALUES (#{name}, #{email}, #{phone}, #{address}, #{createdDate})
+    </insert>
+
+    <select id="findAll" resultType="com.changhak.bookmanager.domain.Member">
+        SELECT id, name, email, phone, address, created_date, withdrawn
+        FROM member
+        WHERE deleted = false
+        ORDER BY id DESC
+    </select>
+
+    <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Member">
+        SELECT id, name, email, phone, address, created_date, withdrawn
+        FROM member
+        WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="com.changhak.bookmanager.domain.Member">
+        UPDATE member
+        SET name = #{name},
+        email = #{email},
+        phone = #{phone},
+        address = #{address}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 논리 삭제 -->
+    <update id="withdraw" parameterType="long">
+        UPDATE member SET withdrawn = true WHERE id = #{id}
+    </update>
+
+    <!-- 탈퇴 복구 -->
+    <update id="restore" parameterType="long">
+        UPDATE member SET withdrawn = false WHERE id = #{id}
+    </update>
+
+    <!-- 완전 삭제 -->
+    <delete id="delete" parameterType="long">
+        UPDATE member SET deleted = true WHERE id = #{id}
+    </delete>
+
+    <select id="search" parameterType="com.changhak.bookmanager.dto.SearchCondition"
+            resultType="com.changhak.bookmanager.domain.Member">
+        SELECT id, name, email, phone, address, created_date, withdrawn
+        FROM member
+        <where>
+            deleted = false
+            <if test="keyword != null and keyword != ''">
+                AND (
+                name LIKE CONCAT('%', #{keyword}, '%')
+                OR email LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY created_date DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" parameterType="com.changhak.bookmanager.dto.SearchCondition" resultType="int">
+        SELECT COUNT(*)
+        FROM member
+        <where>
+            deleted = false
+            <if test="keyword != null and keyword != ''">
+                AND (
+                name LIKE CONCAT('%', #{keyword}, '%')
+                OR email LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+</mapper>
+
+

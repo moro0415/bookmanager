@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.changhak.bookmanager.repository.LoanRepository">
+
+    <!-- 1. 대출 등록 -->
+    <insert id="save"
+            parameterType="com.changhak.bookmanager.domain.Loan"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO loan (book_id, member_id, loan_date)
+        VALUES (#{bookId}, #{memberId}, #{loanDate})
+    </insert>
+
+    <!-- 2. 반납 처리 -->
+    <update id="returnBook" parameterType="long">
+        UPDATE loan
+        SET return_date = CURRENT_DATE
+        WHERE id = #{id}
+        AND return_date IS NULL
+    </update>
+
+    <!-- 3. 삭제 처리 -->
+    <delete id="delete" parameterType="long">
+        DELETE FROM loan WHERE id = #{id}
+    </delete>
+
+    <!-- 4. 단건 조회 -->
+    <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Loan">
+        SELECT * FROM loan WHERE id = #{id}
+    </select>
+
+    <!-- 5. 전체 조회 -->
+    <select id="findAll" resultType="com.changhak.bookmanager.domain.Loan">
+        SELECT * FROM loan ORDER BY loan_date DESC
+    </select>
+
+    <!-- 6. 중복 대출 여부 확인 -->
+    <select id="findActiveLoan"
+            parameterType="map"
+            resultType="com.changhak.bookmanager.domain.Loan">
+        SELECT *
+        FROM loan
+        WHERE book_id = #{bookId}
+        AND member_id = #{memberId}
+        AND return_date IS NULL
+    </select>
+
+    <!-- 7. 특정 도서 미반납 존재 여부 -->
+    <select id="existsUnreturnedLoanByBookId" parameterType="long" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1 FROM loan
+        WHERE book_id = #{bookId}
+        AND return_date IS NULL
+        )
+    </select>
+
+    <!-- 8. 특정 회원 미반납 존재 여부 -->
+    <select id="existsUnreturnedLoanByMemberId" parameterType="long" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1 FROM loan
+        WHERE member_id = #{memberId}
+        AND return_date IS NULL
+        )
+    </select>
+
+    <!-- 9. LoanDto 매핑 -->
+    <resultMap id="LoanDtoMap" type="com.changhak.bookmanager.dto.LoanDto">
+        <association property="loan" javaType="com.changhak.bookmanager.domain.Loan">
+            <id property="id" column="loan_id"/>
+            <result property="bookId" column="book_id"/>
+            <result property="memberId" column="member_id"/>
+            <result property="loanDate" column="loan_date"/>
+            <result property="returnDate" column="return_date"/>
+        </association>
+        <association property="book" javaType="com.changhak.bookmanager.domain.Book">
+            <id property="id" column="book_id"/>
+            <result property="title" column="book_title"/>
+            <result property="isbn" column="book_isbn"/>
+        </association>
+        <association property="member" javaType="com.changhak.bookmanager.domain.Member">
+            <id property="id" column="member_id"/>
+            <result property="name" column="member_name"/>
+            <result property="email" column="member_email"/>
+        </association>
+    </resultMap>
+
+    <!-- 10. 검색 -->
+    <select id="search"
+            resultMap="LoanDtoMap"
+            parameterType="com.changhak.bookmanager.dto.SearchCondition">
+        SELECT
+        l.id AS loan_id,
+        l.book_id,
+        l.member_id,
+        l.loan_date,
+        l.return_date,
+
+        b.id AS book_id,
+        b.title AS book_title,
+        b.isbn AS book_isbn,
+
+        m.id AS member_id,
+        m.name AS member_name,
+        m.email AS member_email
+        FROM loan l
+        JOIN book b ON l.book_id = b.id
+        JOIN member m ON l.member_id = m.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                b.title LIKE CONCAT('%', #{keyword}, '%')
+                OR m.name LIKE CONCAT('%', #{keyword}, '%')
+                OR DATE_FORMAT(l.loan_date, '%Y-%m-%d') LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="status != null and status != 'ALL'">
+                <choose>
+                    <when test="status == 'RETURNED'">
+                        AND l.return_date IS NOT NULL
+                    </when>
+                    <when test="status == 'NOT_RETURNED'">
+                        AND l.return_date IS NULL
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ORDER BY l.id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 11. 검색 결과 수 카운트 -->
+    <select id="count"
+            parameterType="com.changhak.bookmanager.dto.SearchCondition"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM loan l
+        JOIN book b ON l.book_id = b.id
+        JOIN member m ON l.member_id = m.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                b.title LIKE CONCAT('%', #{keyword}, '%')
+                OR m.name LIKE CONCAT('%', #{keyword}, '%')
+                OR DATE_FORMAT(l.loan_date, '%Y-%m-%d') LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="status != null and status != 'ALL'">
+                <choose>
+                    <when test="status == 'RETURNED'">
+                        AND l.return_date IS NOT NULL
+                    </when>
+                    <when test="status == 'NOT_RETURNED'">
+                        AND l.return_date IS NULL
+                    </when>
+                </choose>
+            </if>
+        </where>
+    </select>
+
+</mapper>
