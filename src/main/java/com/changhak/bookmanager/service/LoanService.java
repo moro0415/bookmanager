@@ -90,12 +90,12 @@ public class LoanService {
     }
 
 
-    // 🔒 삭제 제약용: 해당 책이 대출 중인지 확인
+    //  삭제 제약용: 해당 책이 대출 중인지 확인
     public boolean isBookCurrentlyLoaned(Long bookId) {
         return loanRepository.existsUnreturnedLoanByBookId(bookId);
     }
 
-    // 🔒 삭제 제약용: 해당 회원이 대출 중인지 확인
+    //  삭제 제약용: 해당 회원이 대출 중인지 확인
     public boolean isMemberCurrentlyLoaning(Long memberId) {
         return loanRepository.existsUnreturnedLoanByMemberId(memberId);
     }

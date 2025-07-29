@@ -40,7 +40,7 @@ public class BookService {
         // 기존 책 정보 조회
         Book origin = findById(book.getId());
 
-        // 재고 방어 로직: 관리자가 기존보다 재고를 "줄이려는" 시도를 무시
+        // 재고 방어 로직: 관리자가 기존보다 재고를 줄이려는 시도를 무시
         if (book.getStock() < origin.getStock()) {
             book.setStock(origin.getStock());
         }

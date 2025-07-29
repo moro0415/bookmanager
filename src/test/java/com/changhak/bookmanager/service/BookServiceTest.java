@@ -20,7 +20,6 @@ class BookServiceTest {
     @Test
     void save(){
         Book book = new Book();
-        //아이디는 안해도 되나
         book.setTitle("test book");
         book.setAuthor("홍길동");
         book.setPublisher("test publisher");

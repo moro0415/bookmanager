@@ -5,7 +5,7 @@
 
 <mapper namespace="com.changhak.bookmanager.repository.LoanRepository">
 
-    <!-- 1. 대출 등록 -->
+    <!-- 대출 등록 -->
     <insert id="save"
             parameterType="com.changhak.bookmanager.domain.Loan"
             useGeneratedKeys="true"
@@ -14,7 +14,7 @@
         VALUES (#{bookId}, #{memberId}, #{loanDate})
     </insert>
 
-    <!-- 2. 반납 처리 -->
+    <!-- 반납 처리 -->
     <update id="returnBook" parameterType="long">
         UPDATE loan
         SET return_date = CURRENT_DATE
@@ -22,22 +22,22 @@
         AND return_date IS NULL
     </update>
 
-    <!-- 3. 삭제 처리 -->
+    <!-- 삭제 처리 -->
     <delete id="delete" parameterType="long">
         DELETE FROM loan WHERE id = #{id}
     </delete>
 
-    <!-- 4. 단건 조회 -->
+    <!-- 단건 조회 -->
     <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Loan">
         SELECT * FROM loan WHERE id = #{id}
     </select>
 
-    <!-- 5. 전체 조회 -->
+    <!-- 전체 조회 -->
     <select id="findAll" resultType="com.changhak.bookmanager.domain.Loan">
         SELECT * FROM loan ORDER BY loan_date DESC
     </select>
 
-    <!-- 6. 중복 대출 여부 확인 -->
+    <!-- 중복 대출 여부 확인 -->
     <select id="findActiveLoan"
             parameterType="map"
             resultType="com.changhak.bookmanager.domain.Loan">
@@ -48,7 +48,7 @@
         AND return_date IS NULL
     </select>
 
-    <!-- 7. 특정 도서 미반납 존재 여부 -->
+    <!-- 특정 도서 미반납 존재 여부 -->
     <select id="existsUnreturnedLoanByBookId" parameterType="long" resultType="boolean">
         SELECT EXISTS (
         SELECT 1 FROM loan
@@ -57,7 +57,7 @@
         )
     </select>
 
-    <!-- 8. 특정 회원 미반납 존재 여부 -->
+    <!-- 특정 회원 미반납 존재 여부 -->
     <select id="existsUnreturnedLoanByMemberId" parameterType="long" resultType="boolean">
         SELECT EXISTS (
         SELECT 1 FROM loan
@@ -66,7 +66,7 @@
         )
     </select>
 
-    <!-- 9. LoanDto 매핑 -->
+    <!-- LoanDto 매핑 -->
     <resultMap id="LoanDtoMap" type="com.changhak.bookmanager.dto.LoanDto">
         <association property="loan" javaType="com.changhak.bookmanager.domain.Loan">
             <id property="id" column="loan_id"/>
@@ -87,7 +87,7 @@
         </association>
     </resultMap>
 
-    <!-- 10. 검색 -->
+    <!-- 검색 -->
     <select id="search"
             resultMap="LoanDtoMap"
             parameterType="com.changhak.bookmanager.dto.SearchCondition">
@@ -131,7 +131,7 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
-    <!-- 11. 검색 결과 수 카운트 -->
+    <!-- 검색 결과 수 카운트 -->
     <select id="count"
             parameterType="com.changhak.bookmanager.dto.SearchCondition"
             resultType="int">
