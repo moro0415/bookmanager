@@ -5,6 +5,7 @@
 
 <mapper namespace="com.changhak.bookmanager.repository.AdminRepository">
 
+    <!-- 관리자 계정 단건 조회-->
     <select id="findByLoginId" resultType="com.changhak.bookmanager.domain.Admin">
         SELECT id, login_id, password, name
         FROM admin

@@ -6,6 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * 관리자 로그인 서비스
+ * - loginId로 관리자 계정을 조회
+ * - BCryptPasswordEncoder SecurityConfig에서 빈 등록)를 사용해 해시 기반 비밀번호 검증
+ * - 로그인 실패 시 예외 대신 null 반환 (LoginController에서 분기 처리)
+ */
 @Service
 @RequiredArgsConstructor
 public class LoginService {
