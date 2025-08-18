@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * 도서 서비스
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -18,6 +21,7 @@ public class BookService {
     private final BookRepository bookRepository;
     private final LoanService loanService;
 
+    /** 도서 저장 */
     public Book save(Book book){
         int result = bookRepository.save(book);
         if(result != 1){
@@ -26,16 +30,19 @@ public class BookService {
         return findById(book.getId());
     }
 
+    /** 도서 전체 조회 */
     public List<Book> findAll(){
         return bookRepository.findAll();
     }
 
+    /** 도서 단건 조회 */
     public Book findById(Long id){
         return Optional.ofNullable(bookRepository.findById(id))
                 .filter(book -> !book.isDeleted()) // 삭제되지 않은 도서만 허용
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 도서입니다. ID=" + id));
     }
 
+    /** 도서 정보 수정 */
     public Book update(Book book) {
         // 기존 책 정보 조회
         Book origin = findById(book.getId());
@@ -55,6 +62,7 @@ public class BookService {
         return findById(book.getId());
     }
 
+    /** 도서 삭제 */
     public void delete(Long id) {
         if (loanService.isBookCurrentlyLoaned(id)) {
             throw new IllegalStateException("대출 중인 도서는 삭제할 수 없습니다.");
@@ -66,11 +74,11 @@ public class BookService {
             throw new IllegalStateException("도서 삭제 실패");
         }
     }
-
+    /** 도서 검색 처리 */
     public List<Book> search(SearchCondition condition){
         return bookRepository.search(condition);
     }
-
+    /** 페이징용 도서 수 카운트 */
     public int count(SearchCondition condition) {
         return bookRepository.count(condition);
     }

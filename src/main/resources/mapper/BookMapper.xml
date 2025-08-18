@@ -5,6 +5,7 @@
 
 <mapper namespace="com.changhak.bookmanager.repository.BookRepository">
 
+    <!-- 도서 등록  -->
     <insert id="save"
             parameterType="com.changhak.bookmanager.domain.Book"
             useGeneratedKeys="true"
@@ -13,6 +14,8 @@
         VALUES (#{title}, #{author}, #{publisher}, #{isbn}, #{stock}, #{imageFilename}, #{thumbnailFilename})
     </insert>
 
+    <!-- 전체 도서 목록 조회
+        - 삭제되지 않은 도서만 조회 (deleted = false) -->
     <select id="findAll" resultType="com.changhak.bookmanager.domain.Book">
         SELECT id, title, author, publisher, isbn, stock, deleted,
         image_filename AS imageFilename,
@@ -22,6 +25,7 @@
         ORDER BY id DESC
     </select>
 
+    <!-- 단일 도서 상세 조회 -->
     <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Book">
         SELECT id, title, author, publisher, isbn, stock, deleted,
         image_filename AS imageFilename,
@@ -29,63 +33,73 @@
         FROM book
         WHERE id = #{id}
     </select>
+    <!-- 도서 정보 수정 -->
+       <update id="update" parameterType="com.changhak.bookmanager.domain.Book">
+           UPDATE book
+           SET title = #{title},
+           author = #{author},
+           publisher = #{publisher},
+           isbn = #{isbn},
+           stock = #{stock},
+           image_filename = #{imageFilename},
+           thumbnail_filename = #{thumbnailFilename}
+           WHERE id = #{id}
+       </update>
 
-    <update id="update" parameterType="com.changhak.bookmanager.domain.Book">
-        UPDATE book
-        SET title = #{title},
-        author = #{author},
-        publisher = #{publisher},
-        isbn = #{isbn},
-        stock = #{stock},
-        image_filename = #{imageFilename},
-        thumbnail_filename = #{thumbnailFilename}
-        WHERE id = #{id}
-    </update>
+    <!-- 도서 삭제 (논리 삭제)
+         - deleted = true로 변경
+         - DB 데이터와 대출 이력은 보존됨 -->
+       <delete id="delete" parameterType="long">
+           UPDATE book SET deleted = true WHERE id = #{id}
+       </delete>
 
-    <delete id="delete" parameterType="long">
-        UPDATE book SET deleted = true WHERE id = #{id}
-    </delete>
+    <!-- 도서 검색 + 페이징 처리
+         - 기본 조건: deleted = false
+         - 검색 키워드(keyword)가 있으면 제목/저자/출판사 LIKE 검색 -->
+       <select id="search" parameterType="com.changhak.bookmanager.dto.SearchCondition"
+               resultType="com.changhak.bookmanager.domain.Book">
+           SELECT id, title, author, publisher, isbn, stock, deleted,
+           image_filename AS imageFilename,
+           thumbnail_filename AS thumbnailFilename
+           FROM book
+           <where>
+               deleted = false
+               <if test="keyword != null and keyword != ''">
+                   AND (
+                   title LIKE CONCAT('%', #{keyword}, '%')
+                   OR author LIKE CONCAT('%', #{keyword}, '%')
+                   OR publisher LIKE CONCAT('%', #{keyword}, '%')
+                   )
+               </if>
+           </where>
+           ORDER BY id DESC
+           LIMIT #{size} OFFSET #{offset}
+       </select>
 
-    <select id="search" parameterType="com.changhak.bookmanager.dto.SearchCondition"
-            resultType="com.changhak.bookmanager.domain.Book">
-        SELECT id, title, author, publisher, isbn, stock, deleted,
-        image_filename AS imageFilename,
-        thumbnail_filename AS thumbnailFilename
-        FROM book
-        <where>
-            deleted = false
-            <if test="keyword != null and keyword != ''">
-                AND (
-                title LIKE CONCAT('%', #{keyword}, '%')
-                OR author LIKE CONCAT('%', #{keyword}, '%')
-                OR publisher LIKE CONCAT('%', #{keyword}, '%')
-                )
-            </if>
-        </where>
-        ORDER BY id DESC
-        LIMIT #{size} OFFSET #{offset}
-    </select>
+    <!-- 검색 조건에 맞는 도서 수 카운트
+         - 페이징 시 전체 페이지 계산용 -->
+       <select id="count" parameterType="com.changhak.bookmanager.dto.SearchCondition" resultType="int">
+           SELECT COUNT(*)
+           FROM book
+           <where>
+               deleted = false
+               <if test="keyword != null and keyword != ''">
+                   AND (
+                   title LIKE CONCAT('%', #{keyword}, '%')
+                   OR author LIKE CONCAT('%', #{keyword}, '%')
+                   OR publisher LIKE CONCAT('%', #{keyword}, '%')
+                   )
+               </if>
+           </where>
+       </select>
 
-    <select id="count" parameterType="com.changhak.bookmanager.dto.SearchCondition" resultType="int">
-        SELECT COUNT(*)
-        FROM book
-        <where>
-            deleted = false
-            <if test="keyword != null and keyword != ''">
-                AND (
-                title LIKE CONCAT('%', #{keyword}, '%')
-                OR author LIKE CONCAT('%', #{keyword}, '%')
-                OR publisher LIKE CONCAT('%', #{keyword}, '%')
-                )
-            </if>
-        </where>
-    </select>
+      <!-- 재고 수량 업데이트
+        - 대출/반납 처리 시 사용 -->
+       <update id="updateStock">
+           UPDATE book
+           SET stock = #{stock}
+           WHERE id = #{id}
+       </update>
 
-    <update id="updateStock">
-        UPDATE book
-        SET stock = #{stock}
-        WHERE id = #{id}
-    </update>
-
-</mapper>
+   </mapper>
 

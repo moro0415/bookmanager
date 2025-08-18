@@ -7,6 +7,10 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * 도서 Repository
+ * - 실제 SQL은 resources/mapper/BookMapper.xml에 정의
+ */
 @Mapper
 public interface BookRepository {
 
