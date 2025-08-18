@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+
+/**
+ * 회원 서비스
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,6 +24,7 @@ public class MemberService {
     private final LoanService loanService;
 
 
+    /** 회원 저장 */
     public Member save(Member member){
         member.setCreatedDate(LocalDateTime.now());
         int result = memberRepository.save(member);
@@ -29,16 +34,19 @@ public class MemberService {
         return findById(member.getId());
     }
 
+    /** 회원 전체 조회 */
     public List<Member> findAll(){
         return memberRepository.findAll();
     }
 
+    /** 회원 단건 조회 */
     public Member findById(Long id){
         return Optional.ofNullable(memberRepository.findById(id))
                 .filter(member -> !member.isDeleted()) // 삭제되지 않은 회원만 허용
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않거나 삭제된 회원입니다. ID=" + id));
     }
 
+    /** 회원 정보 수정 */
     public Member update(Member member){
         int result = memberRepository.update(member);
         if(result != 1){
@@ -47,6 +55,7 @@ public class MemberService {
         return findById(member.getId());
     }
 
+    /** 회원 탈퇴 */
     public void withdraw(Long id){
         if (loanService.isMemberCurrentlyLoaning(id)) {
             throw new IllegalStateException("해당 회원은 대출 중인 도서를 보유하고 있어 탈퇴할 수 없습니다.");
@@ -58,6 +67,7 @@ public class MemberService {
         }
     }
 
+    /** 회원 탈퇴 복구 */
     public void restore(Long id){
         int result = memberRepository.restore(id);
         if (result != 1){
@@ -65,6 +75,7 @@ public class MemberService {
         }
     }
 
+    /** 도서 삭제 */
     public void delete(Long id) {
         Member member = findById(id);
 
@@ -73,7 +84,7 @@ public class MemberService {
             throw new IllegalStateException("탈퇴하지 않은 회원은 삭제할 수 없습니다.");
         }
 
-        // 조건 2: 아직 반납하지 않은 도서를 대출 중인 회원은 삭제 불가
+        // 조건 2: 반납하지 않은 도서를 보유 중인 회원은 삭제 불가
         if (loanService.isMemberCurrentlyLoaning(id)) {
             throw new IllegalStateException("반납하지 않은 도서를 보유 중인 회원은 삭제할 수 없습니다.");
         }
@@ -85,11 +96,12 @@ public class MemberService {
         }
     }
 
-
+    /** 회원 검색 처리 */
     public List<Member> search(SearchCondition condition) {
         return memberRepository.search(condition);
     }
 
+    /** 페이징용 회원 수 카운트 */
     public int count(SearchCondition condition) {
         return memberRepository.count(condition);
     }

@@ -64,6 +64,8 @@ public class BookService {
 
     /** 도서 삭제 */
     public void delete(Long id) {
+
+        // 조건 : 아직 반납되지 않은 도서는 삭제 불가
         if (loanService.isBookCurrentlyLoaned(id)) {
             throw new IllegalStateException("대출 중인 도서는 삭제할 수 없습니다.");
         }

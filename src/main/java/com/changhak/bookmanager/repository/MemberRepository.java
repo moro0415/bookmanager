@@ -6,6 +6,10 @@ import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
+/**
+ * 회원 Repository
+ * - 실제 SQL은 resources/mapper/MemberMapper.xml에 정의
+ */
 @Mapper
 public interface MemberRepository {
 
@@ -14,9 +18,9 @@ public interface MemberRepository {
     Member findById(Long id);
     int update(Member member);
 
-    int withdraw(Long id);     // 탈퇴 처리
-    int restore(Long id);      // 탈퇴 복구
-    int delete(Long id);       // 완전 삭제
+    int withdraw(Long id);
+    int restore(Long id);
+    int delete(Long id);
 
     List<Member> search(SearchCondition condition);
     int count(SearchCondition condition);

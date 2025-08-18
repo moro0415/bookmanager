@@ -14,7 +14,7 @@ import java.util.Optional;
 @Mapper
 public interface BookRepository {
 
-    int save(Book book);  // insert 실행시 영향받은 행 수 리턴
+    int save(Book book);
     List<Book> findAll();
     Book findById(Long id);
     int update(Book book);

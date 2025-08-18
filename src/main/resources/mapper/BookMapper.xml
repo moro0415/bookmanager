@@ -25,7 +25,7 @@
         ORDER BY id DESC
     </select>
 
-    <!-- 단일 도서 상세 조회 -->
+    <!-- 단일 도서 조회 -->
     <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Book">
         SELECT id, title, author, publisher, isbn, stock, deleted,
         image_filename AS imageFilename,
@@ -33,6 +33,7 @@
         FROM book
         WHERE id = #{id}
     </select>
+
     <!-- 도서 정보 수정 -->
        <update id="update" parameterType="com.changhak.bookmanager.domain.Book">
            UPDATE book
