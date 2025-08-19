@@ -5,6 +5,7 @@
 
 <mapper namespace="com.changhak.bookmanager.repository.MemberRepository">
 
+    <!-- 회원 저장 (신규 회원 등록) -->
     <insert id="save"
             parameterType="com.changhak.bookmanager.domain.Member"
             useGeneratedKeys="true"
@@ -13,6 +14,8 @@
         VALUES (#{name}, #{email}, #{phone}, #{address}, #{createdDate})
     </insert>
 
+    <!-- 전체 회원 목록 조회
+       - 삭제되지 않은 회원만 조회 (deleted = false) -->
     <select id="findAll" resultType="com.changhak.bookmanager.domain.Member">
         SELECT id, name, email, phone, address, created_date, withdrawn
         FROM member
@@ -20,12 +23,14 @@
         ORDER BY id DESC
     </select>
 
+    <!-- 단일 회원 조회  -->
     <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Member">
         SELECT id, name, email, phone, address, created_date, withdrawn
         FROM member
         WHERE id = #{id}
     </select>
 
+    <!-- 회원 정보 수정 -->
     <update id="update" parameterType="com.changhak.bookmanager.domain.Member">
         UPDATE member
         SET name = #{name},
@@ -35,21 +40,28 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 논리 삭제 -->
+    <!-- 회원 탈퇴 처리
+       - withdrawn = true로 변경 -->
     <update id="withdraw" parameterType="long">
         UPDATE member SET withdrawn = true WHERE id = #{id}
     </update>
 
-    <!-- 탈퇴 복구 -->
+    <!-- 회원 탈퇴 처리
+       - withdrawn = false로 변경 -->
     <update id="restore" parameterType="long">
         UPDATE member SET withdrawn = false WHERE id = #{id}
     </update>
 
-    <!-- 완전 삭제 -->
+    <!-- 회원 삭제 (논리 삭제)
+        - deleted = true로 변경
+        - DB 데이터와 대출 이력은 보존됨 -->
     <delete id="delete" parameterType="long">
         UPDATE member SET deleted = true WHERE id = #{id}
     </delete>
 
+    <!-- 회원 검색 + 페이징 처리
+         - 기본 조건: deleted = false
+         - 검색 키워드(keyword)가 있으면 이름/이메일 LIKE 검색 -->
     <select id="search" parameterType="com.changhak.bookmanager.dto.SearchCondition"
             resultType="com.changhak.bookmanager.domain.Member">
         SELECT id, name, email, phone, address, created_date, withdrawn
@@ -67,6 +79,8 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
+    <!-- 검색 조건에 맞는 회원 수 카운트
+        - 페이징 시 전체 페이지 계산용 -->
     <select id="count" parameterType="com.changhak.bookmanager.dto.SearchCondition" resultType="int">
         SELECT COUNT(*)
         FROM member

@@ -5,7 +5,7 @@
 
 <mapper namespace="com.changhak.bookmanager.repository.LoanRepository">
 
-    <!-- 1. 대출 등록 -->
+    <!-- 대출 등록 -->
     <insert id="save"
             parameterType="com.changhak.bookmanager.domain.Loan"
             useGeneratedKeys="true"
@@ -14,7 +14,9 @@
         VALUES (#{bookId}, #{memberId}, #{loanDate})
     </insert>
 
-    <!-- 2. 반납 처리 -->
+    <!-- 반납 처리 (UPDATE) -->
+    <!-- 해당 대출 건의 return_date를 오늘 날짜로 업데이트 -->
+    <!-- 이미 반납된 건(return_date != null)은 갱신되지 않음 -->
     <update id="returnBook" parameterType="long">
         UPDATE loan
         SET return_date = CURRENT_DATE
@@ -22,22 +24,23 @@
         AND return_date IS NULL
     </update>
 
-    <!-- 3. 삭제 처리 -->
+    <!-- 대출 삭제 (완전 삭제) -->
     <delete id="delete" parameterType="long">
         DELETE FROM loan WHERE id = #{id}
     </delete>
 
-    <!-- 4. 단건 조회 -->
+    <!-- 단건 조회 -->
     <select id="findById" parameterType="long" resultType="com.changhak.bookmanager.domain.Loan">
         SELECT * FROM loan WHERE id = #{id}
     </select>
 
-    <!-- 5. 전체 조회 -->
+    <!-- 전체 조회 -->
     <select id="findAll" resultType="com.changhak.bookmanager.domain.Loan">
         SELECT * FROM loan ORDER BY loan_date DESC
     </select>
 
-    <!-- 6. 중복 대출 여부 확인 -->
+    <!-- 중복 대출 여부 확인 -->
+    <!-- 동일 회원이 같은 책을 아직 반납하지 않은 상태인지 조회 -->
     <select id="findActiveLoan"
             parameterType="map"
             resultType="com.changhak.bookmanager.domain.Loan">
@@ -48,7 +51,7 @@
         AND return_date IS NULL
     </select>
 
-    <!-- 7. 특정 도서 미반납 존재 여부 -->
+    <!-- 특정 도서가 아직 반납되지 않았는지 여부 확인 -->
     <select id="existsUnreturnedLoanByBookId" parameterType="long" resultType="boolean">
         SELECT EXISTS (
         SELECT 1 FROM loan
@@ -57,7 +60,7 @@
         )
     </select>
 
-    <!-- 8. 특정 회원 미반납 존재 여부 -->
+    <!-- 특정 회원이 아직 책을 반납하지 않았는지 여부 확인 -->
     <select id="existsUnreturnedLoanByMemberId" parameterType="long" resultType="boolean">
         SELECT EXISTS (
         SELECT 1 FROM loan
@@ -66,7 +69,8 @@
         )
     </select>
 
-    <!-- 9. LoanDto 매핑 -->
+    <!-- LoanDto 매핑 정의 -->
+    <!-- Loan + Book + Member 정보를 JOIN으로 묶어서 DTO로 반환할 때 사용 -->
     <resultMap id="LoanDtoMap" type="com.changhak.bookmanager.dto.LoanDto">
         <association property="loan" javaType="com.changhak.bookmanager.domain.Loan">
             <id property="id" column="loan_id"/>
@@ -87,7 +91,9 @@
         </association>
     </resultMap>
 
-    <!-- 10. 검색 -->
+    <!-- 대출 검색 + 상태 필터 + 페이징 -->
+    <!-- 검색 조건: keyword(도서 제목, 회원명, 대출일), status(RETURNED/NOT_RETURNED/ALL) -->
+    <!-- 결과는 LoanDtoMap으로 매핑 -->
     <select id="search"
             resultMap="LoanDtoMap"
             parameterType="com.changhak.bookmanager.dto.SearchCondition">
@@ -109,6 +115,7 @@
         JOIN book b ON l.book_id = b.id
         JOIN member m ON l.member_id = m.id
         <where>
+            <!-- 키워드 검색: 도서 제목 / 회원 이름 / 대출일 -->
             <if test="keyword != null and keyword != ''">
                 AND (
                 b.title LIKE CONCAT('%', #{keyword}, '%')
@@ -116,6 +123,7 @@
                 OR DATE_FORMAT(l.loan_date, '%Y-%m-%d') LIKE CONCAT('%', #{keyword}, '%')
                 )
             </if>
+            <!-- 반납 상태 필터 -->
             <if test="status != null and status != 'ALL'">
                 <choose>
                     <when test="status == 'RETURNED'">
@@ -131,7 +139,8 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
-    <!-- 11. 검색 결과 수 카운트 -->
+    <!-- 검색 결과 수 카운트 (페이징용) -->
+    <!-- search 쿼리와 동일 조건으로 COUNT(*) 계산 -->
     <select id="count"
             parameterType="com.changhak.bookmanager.dto.SearchCondition"
             resultType="int">

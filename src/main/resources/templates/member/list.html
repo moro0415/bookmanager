@@ -61,7 +61,7 @@
             <td th:text="${#temporals.format(member.createdDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td>
                 <span th:if="${member.withdrawn}" class="text-danger">탈퇴</span>
-                <span th:if="${!member.withdrawn}" class="text-success">사용 중</span>
+                <span th:if="${!member.withdrawn}" class="text-success">이용 중</span>
             </td>
             <td>
                 <div class="d-flex flex-wrap gap-1 justify-content-center">
