@@ -44,6 +44,7 @@ public class BookService {
 
     /** 도서 정보 수정 */
     public Book update(Book book) {
+
         // 기존 책 정보 조회
         Book origin = findById(book.getId());
 

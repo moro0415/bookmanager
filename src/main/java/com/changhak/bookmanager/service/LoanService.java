@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/** 대출 서비스 */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -23,8 +24,9 @@ public class LoanService {
     private final MemberRepository memberRepository;
     private final InventoryService inventoryService;
 
-    // 대출 등록
+    /** 대출 등록 */
     public Loan createLoan(Long bookId, Long memberId) {
+
         // 중복 대출 방지
         Loan existingLoan = loanRepository.findActiveLoan(bookId, memberId);
         if (existingLoan != null) {
@@ -50,7 +52,7 @@ public class LoanService {
         return loan;
     }
 
-    // 반납 처리
+    /** 반납 처리 */
     public Loan returnLoan(Long loanId) {
         Loan loan = findById(loanId);
 
@@ -64,21 +66,23 @@ public class LoanService {
         return loan;
     }
 
-    // 전체 대출 목록
+    /** 전체 대출 목록 */
     public List<Loan> findAll() {
         return loanRepository.findAll();
     }
 
-    // 단건 조회
+    /** 대출 단건 조회 */
     public Loan findById(Long id) {
         return Optional.ofNullable(loanRepository.findById(id))
                 .orElseThrow(() -> new IllegalArgumentException("대출 정보를 찾을 수 없습니다. ID=" + id));
     }
 
-    // 삭제
+    /** 대출 삭제 */
+    //완전 삭제
     public void delete(Long id) {
         Loan loan = findById(id);
 
+        //반납 여부 검증
         if (loan.getReturnDate() == null) {
             throw new IllegalStateException("반납되지 않은 대출은 삭제할 수 없습니다.");
         }
@@ -89,21 +93,22 @@ public class LoanService {
         }
     }
 
-
-    //  삭제 제약용: 해당 책이 대출 중인지 확인
+    /** 삭제 제약용: 해당 책이 대출 중인지 확인 */
     public boolean isBookCurrentlyLoaned(Long bookId) {
         return loanRepository.existsUnreturnedLoanByBookId(bookId);
     }
 
-    //  삭제 제약용: 해당 회원이 대출 중인지 확인
+    /** 삭제 제약용: 해당 회원이 대출 중인지 확인 */
     public boolean isMemberCurrentlyLoaning(Long memberId) {
         return loanRepository.existsUnreturnedLoanByMemberId(memberId);
     }
 
+    /** 대출 검색 처리 */
     public List<LoanDto> search(SearchCondition condition){
         return loanRepository.search(condition);
     }
 
+    /** 페이징용 대출 수 카운트 */
     public int count(SearchCondition condition) {
         return loanRepository.count(condition);
     }

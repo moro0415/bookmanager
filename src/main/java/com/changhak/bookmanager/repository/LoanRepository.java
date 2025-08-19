@@ -7,6 +7,10 @@ import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
+/**
+ * 대출 Repository
+ * - 실제 SQL은 resources/mapper/LoanMapper.xml에 정의
+ */
 @Mapper
 public interface LoanRepository {
     int save(Loan loan);
