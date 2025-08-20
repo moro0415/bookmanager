@@ -187,42 +187,44 @@ CREATE DATABASE bookmanager CHARACTER SET utf8mb4;
 
 **Auth**
 
-* `GET /login`  로그인 페이지
-* `POST /login` 로그인 처리 → 세션 `loginAdmin` 설정
-* `POST /logout` 로그아웃(세션 무효화)
+* `GET /login`              로그인 페이지
+* `POST /login`             로그인 처리 → 세션 `loginAdmin` 설정
+* `POST /logout`            로그아웃(세션 무효화)
 
 **Home**
 
-* `GET /`  (세션 필요, 없으면 `/login`으로 리다이렉트)
+* `GET /`                   홈 (세션 필요, 없으면 `/login`으로 리다이렉트)
 
 **Books**
 
-* `GET /books`                목록(검색/페이징)
-* `GET /books/{id}`           상세
-* `GET /books/new`            등록 폼
-* `POST /books/add`           등록 처리(이미지 업로드)
-* `GET /books/edit/{id}`      수정 폼
-* `POST /books/edit/{id}`     수정 처리(이미지 교체 시 이전 파일 정리)
-* `POST /books/delete/{id}`   삭제(논리 삭제 + 원본/썸네일 동기 삭제)
+* `GET /books`              목록(검색/페이징)
+* `GET /books/{id}`         상세
+* `GET /books/add`          등록 폼
+* `POST /books/add`         등록 처리(이미지 업로드)
+* `GET /books/edit/{id}`    수정 폼
+* `POST /books/edit/{id}`   수정 처리(이미지 교체 시 이전 파일 정리)
+* `POST /books/delete/{id}` 삭제(논리 삭제 + 원본/썸네일 동기 삭제)
 
 **Members**
 
-* `GET /members`              목록(검색/페이징)
-* `GET /members/{id}`         상세
-* `GET /members/new`          등록 폼
-* `POST /members/add`         등록 처리
-* `GET /members/edit/{id}`    수정 폼
-* `POST /members/edit/{id}`   수정 처리
-* `POST /members/delete/{id}` 삭제(논리 삭제)
+* `GET /members`                목록(검색/페이징)
+* `GET /members/{id}`           상세
+* `GET /members/add`            등록 폼
+* `POST /members/add`           등록 처리
+* `GET /members/edit/{id}`      수정 폼
+* `POST /members/edit/{id}`     수정 처리
+* `POST /members/delete/{id}`   삭제(논리 삭제)
+* `POST /members/withdraw/{id}` 회원 탈퇴 처리
+* `POST /members/restore/{id}`  회원 복구 처리
 
 **Loans**
 
-* `GET /loans`                목록(검색/페이징, 반납 여부 필터)
-* `GET /loans/{id}`           상세
-* `GET /loans/new`            등록 폼
-* `POST /loans/add`           대출 처리(재고 차감)
-* `POST /loans/return/{id}`   반납 처리(재고 증가)
-* `POST /loans/delete/{id}`   삭제(완전 삭제)
+* `GET /loans`              목록(검색/페이징, 반납 여부 필터)
+* `GET /loans/{id}`         상세
+* `GET /loans/add`          등록 폼
+* `POST /loans/add`         대출 처리(재고 차감)
+* `POST /loans/return/{id}` 반납 처리(재고 증가)
+* `POST /loans/delete/{id}` 삭제(완전 삭제)
 
 > 일부 경로명은 템플릿/컨트롤러 기준으로 정리했다. 프로젝트 버전에 따라 세부 경로나 파라미터명이 다를 수 있다.
 
